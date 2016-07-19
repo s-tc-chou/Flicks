@@ -1,6 +1,7 @@
 package com.example.steve.flicks;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,15 @@ public class Movie {
     public String title;
     public String description;
     public String posterURL;
+    public String backdropSize;
     public String trailer;
     public String backdropURL;
     public String rating;
 
+    private final String urlPrefix =  "https://image.tmdb.org/t/p/";
+
     //images have https://image.tmdb.org/t/p/ prefixed.
+    //need the image size too.  ex: w300
 
     /*
     "poster_path": "/6FxOPJ9Ysilpq0IgkrMJ7PubFhq.jpg",
@@ -45,19 +50,22 @@ public class Movie {
     "vote_average": 4.48
      */
 
-    public Movie (String title, String description, String posterURL)
+    public Movie (String title, String description, String posterURL, String backdropSize)
     {
         this.title = title;
         this.description = description;
-        this.posterURL = posterURL; //used only for landscape
+        this.backdropSize = backdropSize;
+        this.posterURL = urlPrefix + backdropSize + posterURL; //used only for portrait
 
     }
 
-    public Movie(JSONObject object){
+    //use backdrop size from initialization maybe... but no results from API call here. So where do we get the size from?
+    public Movie(JSONObject object, String size){
         try {
             this.title = object.getString("title");
-            this.posterURL = object.getString("poster_path");
+            this.posterURL = urlPrefix + size + object.getString("poster_path");
             this.description = object.getString("overview");
+            Log.d("JSON Movies", posterURL);
         }
         catch (JSONException e)
         {
@@ -65,13 +73,13 @@ public class Movie {
         }
     }
 
-    public static ArrayList<Movie> fromJson(JSONArray jsonObjects) {
+    public static ArrayList<Movie> fromJson(JSONArray jsonObjects, String size) {
 
         ArrayList<Movie> movies = new ArrayList<Movie>();
 
         for (int i = 0; i < jsonObjects.length(); i++) {
             try {
-                movies.add(new Movie(jsonObjects.getJSONObject(i)));
+                movies.add(new Movie(jsonObjects.getJSONObject(i),size));
             } catch (JSONException e) {
                 e.printStackTrace();
             }

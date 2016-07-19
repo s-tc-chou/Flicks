@@ -22,51 +22,30 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    JSONArray result = new JSONArray();
+    ArrayList<Movie> arrayOfMovies;
+    CustomMovieAdapter movieAdapter;
+    ListView verticalListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        arrayOfMovies = new ArrayList<>();
+        movieAdapter = new CustomMovieAdapter(this, arrayOfMovies);
+        verticalListView = (ListView) findViewById(R.id.movieListViewVertical);
 
-        //JSON response parsing.
-
-        //put the following into a parsing function.
-        //test for async http
-        String url = "https://api.themoviedb.org/3/movie/now_playing?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed";
-
-        getMovieListing(url);
+        verticalListView.setAdapter(movieAdapter);
 
 
-        //debug print
-        Log.d("success", "##########################");
-        Log.d("now trying to print", "" + result.length());
-        for (int i = 0; i < result.length(); i++)
-        {
-            try {
-                String rec = result.getJSONObject(i).toString();
-                //Log.d("JSON Movies", rec);
-            }
-            catch(JSONException e)
-            {
-                Log.e("ERROR", e.toString());
-            }
 
 
-        }
+        String MovieListurl = "https://api.themoviedb.org/3/movie/now_playing?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed";
 
-        //set the below into a loop
-        String imageUrl = "https://i.imgur.com/tGbaZCY.jpg";
+        //maybe do something with the backdrop size... ?
+        String backDropSizeUrl = "https://api.themoviedb.org/3/configuration?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed";
 
-        ArrayList<Movie> arrayOfMovies = new ArrayList<>();
-        CustomMovieAdapter adapter = new CustomMovieAdapter(this, arrayOfMovies);
+        getMovieListing(MovieListurl);
 
-        //attach adapter to list view
-        ListView verticalListView = (ListView) findViewById(R.id.movieListViewVertical);
-        verticalListView.setAdapter(adapter);
-
-        Movie newMovie = new Movie("Test Title", "best movie ever 5/7", imageUrl);
-        adapter.add(newMovie);
     }
 
     private void  getMovieListing(String url)
@@ -87,20 +66,26 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("success", json.toString());
                         try {
 
-                            result = json.getJSONArray("results");
-                            //debug
-                            for (int i = 0; i < result.length(); i++)
+                            JSONArray result = json.getJSONArray("results");
+                            //arrayOfMovies.clear();
+
+                            //arrange based on size.  By default the vertical view will use backdrop image:
+                            //do we pull backdrop size?...
+                            arrayOfMovies.addAll(Movie.fromJson(result, "w300"));
+                            movieAdapter.notifyDataSetChanged();
+
+                            //debug only.
+/*                            for (int i = 0; i < result.length(); i++)
                             {
                                 try {
-
                                     String rec = result.getJSONObject(i).toString();
-                                    //Log.d("JSON Movies", rec);
+                                    Log.d("JSON Movies", rec);
                                 }
                                 catch(JSONException e)
                                 {
                                     Log.e("ERROR", e.toString());
                                 }
-                            }
+                            }*/
                         }
 
                         catch(JSONException e)

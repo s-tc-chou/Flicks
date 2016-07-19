@@ -1,6 +1,7 @@
 package com.example.steve.flicks;
 
 import android.content.Context;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +21,16 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
     private Context context;
     private LayoutInflater inflater;
 
-    public CustomMovieAdapter(Context context, ArrayList<Movie> users) {
-        super(context, 0, users);
+    public static class ViewHolder
+    {
+        TextView movieDesc;
+        TextView movieTitle;
+        ImageView moviePoster;
+
+    }
+
+    public CustomMovieAdapter(Context context, ArrayList<Movie> movies) {
+        super(context, 0, movies);
         this.context = context;
         inflater = LayoutInflater.from(context);
 
