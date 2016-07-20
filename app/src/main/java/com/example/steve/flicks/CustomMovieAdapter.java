@@ -1,3 +1,11 @@
+/***************************************************************************************************
+ CustomMovieAdapter.java
+ Last updated: Steve Chou 7/19/2016
+
+ Custom adapter for displaying movie listing inside a listview.
+
+ **************************************************************************************************/
+
 package com.example.steve.flicks;
 
 import android.content.Context;
@@ -13,9 +21,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-/**
- * Created by Steve on 7/14/2016.
- */
+
 public class CustomMovieAdapter extends ArrayAdapter<Movie> {
 
     private Context context;
@@ -23,10 +29,10 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
 
     public static class ViewHolder
     {
+        //add additional things like trailer, size, etc.
         TextView movieDesc;
         TextView movieTitle;
-        ImageView moviePoster;
-
+        ImageView moviePosterVertical;
     }
 
     public CustomMovieAdapter(Context context, ArrayList<Movie> movies) {
@@ -41,32 +47,32 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
 
         // Get the data item for this position
         Movie movie = getItem(position);
+        ViewHolder viewHolder;
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            //convertView = LayoutInflater.from(getContext()).inflate(R.layout.movie_layout, parent, false);
+            viewHolder = new ViewHolder();
+            LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.movie_layout, parent, false);
+            viewHolder.movieDesc = (TextView) convertView.findViewById(R.id.movieDesc);
+            viewHolder.movieTitle = (TextView) convertView.findViewById(R.id.movieTitle);
+            viewHolder.moviePosterVertical = (ImageView) convertView.findViewById(R.id.moviePoster);
+            convertView.setTag(viewHolder);
+        }
+        else
+        {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
 
         // Lookup view for data population
-
-        //String imageUrl = "https://i.imgur.com/tGbaZCY.jpg";
         //setup an imageview, then load picasso into it.
-        TextView movieDesc = (TextView) convertView.findViewById(R.id.movieDesc);
-        TextView movieTitle = (TextView) convertView.findViewById(R.id.movieTitle);
-        ImageView moviePoster = (ImageView) convertView.findViewById(R.id.moviePoster);
-
-        // Populate the data into the template view using the data object
-        movieDesc.setText(movie.description);
-        movieTitle.setText(movie.title);
+        viewHolder.movieDesc.setText(movie.description);
+        viewHolder.movieTitle.setText(movie.title);
         Picasso
                 .with(context)
                 .load(movie.posterURL)
                 .fit()
-                .into(moviePoster);
-        //moviePoster.setText(user.hometown);
-
-
+                .into(viewHolder.moviePosterVertical);
 
         // Return the completed view to render on screen
         return convertView;

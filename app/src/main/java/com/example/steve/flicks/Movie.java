@@ -1,6 +1,15 @@
+/***************************************************************************************************
+ Movie.java
+ Last updated: Steve Chou 7/19/2016
+
+ Helper class to set various variables pulled from the movie listing API.
+
+ **************************************************************************************************/
+
 package com.example.steve.flicks;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,15 +29,16 @@ public class Movie {
     public String title;
     public String description;
     public String posterURL;
-    public String backdropSize;
-    public String trailer;
+    public String trailerURL;
     public String backdropURL;
-    public String rating;
+    public String rating; //out of 10
+    public String popularity; //out of 50?
 
-    private final String urlPrefix =  "https://image.tmdb.org/t/p/";
+    public  String urlPrefix;
 
-    //images have https://image.tmdb.org/t/p/ prefixed.
-    //need the image size too.  ex: w300
+    static final String BACKDROP_SIZE = "w300"; //portrait
+    static final String POSTER_SIZE = "w342"; //landscape
+    static final String FULL_BACKDROP_SIZE = "original";
 
     /*
     "poster_path": "/6FxOPJ9Ysilpq0IgkrMJ7PubFhq.jpg",
@@ -50,22 +60,37 @@ public class Movie {
     "vote_average": 4.48
      */
 
-    public Movie (String title, String description, String posterURL, String backdropSize)
+    //sample constructor.
+    public Movie (String title, String description, String posterURL, String posterSize)
     {
         this.title = title;
         this.description = description;
-        this.backdropSize = backdropSize;
-        this.posterURL = urlPrefix + backdropSize + posterURL; //used only for portrait
-
+        this.posterURL = urlPrefix + posterSize + posterURL;
     }
 
-    //use backdrop size from initialization maybe... but no results from API call here. So where do we get the size from?
-    public Movie(JSONObject object, String size){
+    //variable setter.  Orientation size is set here.
+    /*TODO: need to somehow determine the proper size to use.  How can we pick out the correct "String" variable to use?
+    Why even get the configuration if we'd need to hardcode this? */
+    public Movie(JSONObject object, String url, int orientation){
         try {
+            this.urlPrefix = url;
             this.title = object.getString("title");
+            String size;
+
+            //portrait = poster, landscape = backdrop. popular = full backdrop.
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+            {
+                size = POSTER_SIZE;
+            }
+            else
+            {
+                size = BACKDROP_SIZE;
+            }
+
             this.posterURL = urlPrefix + size + object.getString("poster_path");
+            this.backdropURL = urlPrefix + size + object.getString("backdrop_path");
             this.description = object.getString("overview");
-            Log.d("JSON Movies", posterURL);
+            //Log.d("JSON Movies", posterURL);
         }
         catch (JSONException e)
         {
@@ -73,13 +98,14 @@ public class Movie {
         }
     }
 
-    public static ArrayList<Movie> fromJson(JSONArray jsonObjects, String size) {
+    //Set variables using the whole array of movies returned.
+    public static ArrayList<Movie> fromJson(JSONArray jsonObjects, String url, int orientation) {
 
         ArrayList<Movie> movies = new ArrayList<Movie>();
 
         for (int i = 0; i < jsonObjects.length(); i++) {
             try {
-                movies.add(new Movie(jsonObjects.getJSONObject(i),size));
+                movies.add(new Movie(jsonObjects.getJSONObject(i), url, orientation));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
