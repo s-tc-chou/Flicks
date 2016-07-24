@@ -8,21 +8,13 @@
 
 package com.example.steve.flicks;
 
-import android.content.Context;
 import android.content.res.Configuration;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class Movie {
 
@@ -31,14 +23,14 @@ public class Movie {
     public String posterURL;
     public String trailerURL;
     public String backdropURL;
-    public String rating; //out of 10
+    public double rating; //out of 10
     public String popularity; //out of 50?
 
     public  String urlPrefix;
 
     static final String BACKDROP_SIZE = "w300"; //portrait
     static final String POSTER_SIZE = "w342"; //landscape
-    static final String FULL_BACKDROP_SIZE = "original";
+    static final String FULL_BACKDROP_SIZE = "w1280";
 
     /*
     "poster_path": "/6FxOPJ9Ysilpq0IgkrMJ7PubFhq.jpg",
@@ -90,6 +82,7 @@ public class Movie {
             this.posterURL = urlPrefix + size + object.getString("poster_path");
             this.backdropURL = urlPrefix + size + object.getString("backdrop_path");
             this.description = object.getString("overview");
+            this.rating = object.getDouble("vote_average");
             //Log.d("JSON Movies", posterURL);
         }
         catch (JSONException e)

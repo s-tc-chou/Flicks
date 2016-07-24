@@ -32,18 +32,14 @@
 
 package com.example.steve.flicks;
 
-import android.content.res.Configuration;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.ListView;
 
-//Async HTTP Client libraries
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.loopj.android.http.*;
-import com.squareup.picasso.Picasso;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,18 +47,26 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
+
+//Async HTTP Client libraries
 
 public class MainActivity extends AppCompatActivity {
 
     ArrayList<Movie> arrayOfMovies;
     CustomMovieAdapter movieAdapter;
-    ListView verticalListView;
+    @BindView(R.id.movieListViewVertical) ListView verticalListView;
+    @BindView(R.id.swipeContainer) SwipeRefreshLayout movieListRefreshSwipe;
+    //@OnClick(R.id.submit)
 
     //API Urls and API Keys
     static final String apiKey = "?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed";
     static final String movieListUrl = "https://api.themoviedb.org/3/movie/now_playing";
     static final String configURL = "https://api.themoviedb.org/3/configuration";
+
+    static final String backDropSizeUrl = configURL + apiKey;
 
     //Static sizes to use for vertical and horizontal positions
 
@@ -71,16 +75,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //binding event for butterknife
+        ButterKnife.bind(this);
 
         arrayOfMovies = new ArrayList<>();
         movieAdapter = new CustomMovieAdapter(this, arrayOfMovies);
-        verticalListView = (ListView) findViewById(R.id.movieListViewVertical);
+
         verticalListView.setAdapter(movieAdapter);
 
         //list specific configuration changes.
-        String backDropSizeUrl = configURL + apiKey;
         int orientation = getResources().getConfiguration().orientation;
-        getImageSizes(backDropSizeUrl, orientation);
+        getImageSizes(orientation);
+        initSwipeRefresh(orientation);
 
 
 
@@ -108,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
                             //arrange based on size.  By default the vertical view will use backdrop image:
                             arrayOfMovies.addAll(Movie.fromJson(result, secureURL, orientation));
                             movieAdapter.notifyDataSetChanged();
+                            movieListRefreshSwipe.setRefreshing(false);
+
 
                             //debug only.
 /*                            for (int i = 0; i < result.length(); i++)
@@ -141,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     * Gets the image sizes from the configuration API URL.  Biggest problem is determining the "correct" image size to use.
     * If we have to compare the results of what we got to a hardcoded value, how is it any different from hardcoding the value to start with?
     * */
-    private void getImageSizes(String url, final int orientation)
+    private void getImageSizes(final int orientation)
     {
         AsyncHttpClient client = new AsyncHttpClient();
         //protrait mode: use poster image
@@ -151,13 +159,12 @@ public class MainActivity extends AppCompatActivity {
 
         final String MovieListurl = movieListUrl + apiKey;
 
-        client.get(url, new JsonHttpResponseHandler() {
+        client.get(backDropSizeUrl, new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject json) {
                         Log.d("success", "***********************************");
                         Log.d("success", json.toString());
                         try {
-
                             //set all the config objects
                             JSONObject images = json.getJSONObject("images");
                             apiConfig.setAll(images);
@@ -177,6 +184,18 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+    }
+
+    private void initSwipeRefresh(final int orientation)
+    {
+        movieListRefreshSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                movieAdapter.clear();
+                movieAdapter.notifyDataSetChanged();
+                getImageSizes(orientation);
+            }
+        });
     }
 
 }
