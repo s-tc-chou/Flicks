@@ -25,6 +25,7 @@ public class Movie {
     public String backdropURL;
     public double rating; //out of 10
     public String popularity; //out of 50?
+    public String releaseDate;
 
     public  String urlPrefix;
 
@@ -33,6 +34,7 @@ public class Movie {
     static final String FULL_BACKDROP_SIZE = "w1280";
 
     /*
+    API results:
     "poster_path": "/6FxOPJ9Ysilpq0IgkrMJ7PubFhq.jpg",
     "adult": false,
     "overview": "Tarzan, having acclimated to life in London, is called back to his former home in the jungle to investigate the activities at a mining encampment.",
@@ -51,6 +53,13 @@ public class Movie {
     "video": false,
     "vote_average": 4.48
      */
+
+    //blank constructor
+    public Movie ()
+    {
+
+    }
+
 
     //sample constructor.
     public Movie (String title, String description, String posterURL, String posterSize)
@@ -83,6 +92,7 @@ public class Movie {
             this.backdropURL = urlPrefix + size + object.getString("backdrop_path");
             this.description = object.getString("overview");
             this.rating = object.getDouble("vote_average");
+            this.releaseDate = object.getString("release_date");
             //Log.d("JSON Movies", posterURL);
         }
         catch (JSONException e)
@@ -105,7 +115,4 @@ public class Movie {
         }
         return movies;
     }
-
-
-
 }

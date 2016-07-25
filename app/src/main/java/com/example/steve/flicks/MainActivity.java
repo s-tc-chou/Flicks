@@ -13,19 +13,12 @@
 
  To do:
 
-
- Advanced: Add pull-to-refresh for popular stream with SwipeRefreshLayout (1 point)
- Advanced: Display a nice default placeholder graphic for each image during loading (read more about Picasso) (1 point)
  Advanced: Improve the user interface through styling and coloring (1 to 5 points depending on the difficulty of UI improvements)
- Advanced: For popular movies (i.e. a movie voted for more than 5 stars), the full backdrop image is displayed. Otherwise, a poster image, the movie title, and overview is listed. Use Heterogenous ListViews and use different ViewHolder layout files for popular movies and less popular ones. (2 points)
-
- Bonus: Expose details of movie (ratings using RatingBar, popularity, and synopsis) in a separate activity. (3 points)
  Bonus: Allow video posts to be played in full-screen using the YouTubePlayerView (2 points)
      - When clicking on a popular movie (i.e. a movie voted for more than 5 stars) the video should be played immediately.
      - Less popular videos rely on the detailed page should show an image preview that can initiate playing a YouTube video.
  Bonus: Add a play icon overlay to popular movies to indicate that the movie can be played (1 point).
- Bonus: Leverage the data binding support module to bind data into one or more activity layout templates.
- Bonus: Apply the popular ButterKnife annotation library to reduce view boilerplate. (1 point)
+
  Bonus: Add a rounded corners for the images using the Picasso transformations. (1 point)
 
  **************************************************************************************************/
@@ -68,9 +61,6 @@ public class MainActivity extends AppCompatActivity {
 
     static final String backDropSizeUrl = configURL + apiKey;
 
-    //Static sizes to use for vertical and horizontal positions
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,17 +70,14 @@ public class MainActivity extends AppCompatActivity {
 
         arrayOfMovies = new ArrayList<>();
         movieAdapter = new CustomMovieAdapter(this, arrayOfMovies);
-
         verticalListView.setAdapter(movieAdapter);
 
-        //list specific configuration changes.
+        //set specific orientation image sizes
         int orientation = getResources().getConfiguration().orientation;
         getImageSizes(orientation);
         initSwipeRefresh(orientation);
-
-
-
     }
+
     /*
     *  Gets the movie listing via API URL.
     *
@@ -105,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
         client.get(url, new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject json) {
-                        Log.d("success", "***********************************");
-                        Log.d("success", json.toString());
                         try {
 
                             JSONArray result = json.getJSONArray("results");
@@ -115,20 +100,6 @@ public class MainActivity extends AppCompatActivity {
                             arrayOfMovies.addAll(Movie.fromJson(result, secureURL, orientation));
                             movieAdapter.notifyDataSetChanged();
                             movieListRefreshSwipe.setRefreshing(false);
-
-
-                            //debug only.
-/*                            for (int i = 0; i < result.length(); i++)
-                            {
-                                try {
-                                    String rec = result.getJSONObject(i).toString();
-                                    Log.d("JSON Movies", rec);
-                                }
-                                catch(JSONException e)
-                                {
-                                    Log.e("ERROR", e.toString());
-                                }
-                            }*/
                         }
 
                         catch(JSONException e)
@@ -160,28 +131,26 @@ public class MainActivity extends AppCompatActivity {
         final String MovieListurl = movieListUrl + apiKey;
 
         client.get(backDropSizeUrl, new JsonHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject json) {
-                        Log.d("success", "***********************************");
-                        Log.d("success", json.toString());
-                        try {
-                            //set all the config objects
-                            JSONObject images = json.getJSONObject("images");
-                            apiConfig.setAll(images);
-                            getMovieListing(MovieListurl, apiConfig, orientation);
-                        }
-
-                        catch(JSONException e)
-                        {
-                            Log.e("ERROR", e.toString());
-                        }
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject json) {
+                    try {
+                        //set all the config objects
+                        JSONObject images = json.getJSONObject("images");
+                        apiConfig.setAll(images);
+                        getMovieListing(MovieListurl, apiConfig, orientation);
                     }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable t, JSONObject e) {
+                    catch(JSONException e)
+                    {
                         Log.e("ERROR", e.toString());
                     }
                 }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable t, JSONObject e) {
+                    Log.e("ERROR", e.toString());
+                }
+            }
         );
 
     }

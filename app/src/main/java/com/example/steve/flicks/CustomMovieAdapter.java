@@ -9,6 +9,7 @@
 package com.example.steve.flicks;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,7 +70,7 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
 
 
         // Get the data item for this position
-        Movie movie = getItem(position);
+        final Movie movie = getItem(position);
 
         //if movie is popular the full backdrop image is displayed
         //w1280
@@ -87,7 +88,17 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
                 viewHolder.movieListView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("test click", "i am clicked");
+                        //Log.d("test click", "i am clicked");
+                        Intent intentMovieDetailActivity = new Intent(context, movieDetailActivity.class);
+                        intentMovieDetailActivity.putExtra("movie_poster", movie.backdropURL);
+                        intentMovieDetailActivity.putExtra("movie_title", movie.title);
+                        intentMovieDetailActivity.putExtra("movie_description", movie.description);
+                        intentMovieDetailActivity.putExtra("movie_release_date", movie.releaseDate);
+                        intentMovieDetailActivity.putExtra("movie_rating", movie.rating);
+                        intentMovieDetailActivity.putExtra("movie_trailer", movie.trailerURL);
+
+
+                        context.startActivity(intentMovieDetailActivity);
                     }
                 });
 
@@ -115,7 +126,7 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
                 convertView = inflater.inflate(R.layout.movie_layout, parent, false);
                 viewHolder = new ViewHolder(convertView);
 
-                //specify click logic to open another activity in fragment
+                //specify click logic to open another activity
                 viewHolder.movieListView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
