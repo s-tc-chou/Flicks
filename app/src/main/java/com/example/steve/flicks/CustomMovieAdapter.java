@@ -10,7 +10,6 @@ package com.example.steve.flicks;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -130,7 +129,17 @@ public class CustomMovieAdapter extends ArrayAdapter<Movie> {
                 viewHolder.movieListView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("test click", "i am clicked");
+                        //Log.d("test click", "i am clicked");
+                        Intent intentMovieDetailActivity = new Intent(context, movieDetailActivity.class);
+                        intentMovieDetailActivity.putExtra("movie_poster", movie.backdropURL);
+                        intentMovieDetailActivity.putExtra("movie_title", movie.title);
+                        intentMovieDetailActivity.putExtra("movie_description", movie.description);
+                        intentMovieDetailActivity.putExtra("movie_release_date", movie.releaseDate);
+                        intentMovieDetailActivity.putExtra("movie_rating", movie.rating);
+                        intentMovieDetailActivity.putExtra("movie_trailer", movie.trailerURL);
+
+
+                        context.startActivity(intentMovieDetailActivity);
                     }
                 });
 
